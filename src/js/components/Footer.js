@@ -7,7 +7,7 @@ export function renderFooter() {
   const c = state.contactInfo;
 
   root.innerHTML = `
-    <div style="max-width: 1400px; margin: 0 auto; text-align: left; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2rem; margin-bottom: 2rem;">
+    <div style="max-width: 1400px; margin: 0 auto; text-align: left; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-bottom: 2rem; width: 100%;">
       <div>
         <div class="brand-logo" style="margin-bottom: 1rem;">
           <div class="brand-icon">

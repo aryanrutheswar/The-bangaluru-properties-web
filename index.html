@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 
 <head>
   <meta charset="UTF-8" />
@@ -7,6 +7,7 @@
   <title>The Bangalore Properties | Verified Rental Homes & Apartments in Bengaluru</title>
   <meta name="description"
     content="Discover premium 1BHK, 2BHK, 3BHK rental apartments, luxury villas, and co-living spaces across Bangalore. Verified owners, 0% brokerage options, and instant visit booking." />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -15,6 +16,10 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     crossorigin="anonymous" />
   <link rel="stylesheet" href="./src/style.css" />
+  <!-- Google Identity Services SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
 
 <body>
@@ -42,12 +47,6 @@
       </div>
     </main>
 
-    <!-- Neighborhood & Tech Hub Distance Guide -->
-    <section id="guide-root" class="guide-section"></section>
-
-    <!-- Interactive Rent & Deposit Calculator -->
-    <section id="calculator-root" class="calculator-section"></section>
-
     <!-- Footer Mounted Here -->
     <footer id="footer-root"></footer>
 
@@ -56,6 +55,12 @@
 
     <!-- Toast Notifications Container -->
     <div id="toast-container" class="toast-container"></div>
+
+    <!-- Floating Book a Call Action Button -->
+    <button id="floating-btn-book-call" class="floating-call-btn" title="Book a Callback with Proprietor V. RAMANA">
+      <i class="fa-solid fa-phone-volume"></i>
+      <span>Book a Call</span>
+    </button>
   </div>
 
   <script type="module" src="./src/main.js"></script>

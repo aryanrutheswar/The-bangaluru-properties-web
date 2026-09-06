@@ -16,64 +16,28 @@ export function renderHero() {
         <h1 class="hero-title">
           Discover Verified <span>Rental Properties</span> in Bangalore
         </h1>
-        <p class="hero-subtitle">
+        <p class="hero-subtitle" style="margin-bottom: 1.25rem;">
           Directly managed by <strong>${c.proprietor} (${c.role})</strong> — Exclusively featuring verified Residential Rentals, Office Space Rentals & Godown Space Rentals across Bengaluru.
         </p>
 
-        <!-- Service Offerings Banner -->
-        <div class="service-pills-bar" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem;">
-          ${c.services.map(s => `
-            <span style="background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-color); padding: 0.35rem 0.85rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; color: #f59e0b; letter-spacing: 0.5px;">
-              ${s}
-            </span>
-          `).join('')}
-        </div>
-
-        <div class="hero-search-box">
-          <div class="search-field">
-            <label class="search-label">
-              <i class="fa-solid fa-location-dot"></i> Select Locality
-            </label>
-            <select id="hero-locality-select" class="search-select">
-              <option value="All">All Bangalore Localities</option>
-              ${LOCALITIES.map(loc => `<option value="${loc}" ${state.filters.locality === loc ? 'selected' : ''}>${loc}</option>`).join('')}
-            </select>
-          </div>
-
-          <div class="search-field">
-            <label class="search-label">
-              <i class="fa-solid fa-bed"></i> BHK / Property Type
-            </label>
-            <select id="hero-bhk-select" class="search-select">
-              <option value="All" ${state.filters.bhk === 'All' ? 'selected' : ''}>All Types</option>
-              <option value="1bhk" ${state.filters.bhk === '1bhk' ? 'selected' : ''}>1 BHK / Studio</option>
-              <option value="2bhk" ${state.filters.bhk === '2bhk' ? 'selected' : ''}>2 BHK Apartment</option>
-              <option value="3bhk" ${state.filters.bhk === '3bhk' ? 'selected' : ''}>3 BHK / Office Space</option>
-              <option value="4bhk" ${state.filters.bhk === '4bhk' ? 'selected' : ''}>4+ BHK / Villa / Godown</option>
-            </select>
-          </div>
-
-          <div class="search-field">
-            <label class="search-label">
-              <i class="fa-solid fa-indian-rupee-sign"></i> Max Rent / Budget
-            </label>
-            <select id="hero-price-select" class="search-select">
-              <option value="150000" ${state.filters.maxPrice >= 150000 ? 'selected' : ''}>Any Budget</option>
-              <option value="30000" ${state.filters.maxPrice === 30000 ? 'selected' : ''}>Up to ₹30,000</option>
-              <option value="50000" ${state.filters.maxPrice === 50000 ? 'selected' : ''}>Up to ₹50,000</option>
-              <option value="80000" ${state.filters.maxPrice === 80000 ? 'selected' : ''}>Up to ₹80,000</option>
-              <option value="120000" ${state.filters.maxPrice === 120000 ? 'selected' : ''}>Up to ₹1.2 Lakhs</option>
-            </select>
-          </div>
-
-          <button id="hero-search-btn" class="btn-search">
-            <i class="fa-solid fa-magnifying-glass"></i> Search
+        <!-- Hero Quick Place Search Bar -->
+        <div class="hero-search-box-wrapper">
+          <i class="fa-solid fa-magnifying-glass-location" style="color: #10b981; font-size: 1.3rem;"></i>
+          <input 
+            type="text" 
+            id="hero-place-search-input" 
+            placeholder="Search place in Bangalore (e.g. Murugeshpalaya, Indiranagar, Bellandur)..." 
+            value="${state.filters.searchQuery}"
+            style="flex-grow: 1; background: transparent; border: none; outline: none; color: var(--text-primary); font-size: 0.95rem; font-weight: 500;"
+          />
+          <button id="hero-place-search-btn" class="nav-btn nav-btn-primary hero-search-btn">
+            Search Place
           </button>
         </div>
 
         <!-- Direct Proprietor Contact Banner -->
-        <div class="hero-contact-card" style="margin-top: 1.5rem; background: linear-gradient(135deg, rgba(15,23,42,0.9), rgba(30,41,59,0.9)); border: 1px solid rgba(245,158,11,0.5); padding: 1.25rem 1.5rem; border-radius: 16px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-          <div style="display: flex; align-items: center; gap: 1rem; text-align: left;">
+        <div class="hero-contact-card">
+          <div class="hero-contact-info-block">
             <div style="width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #fff; flex-shrink: 0; box-shadow: 0 4px 12px rgba(245,158,11,0.4);">
               <i class="fa-solid fa-user-tie"></i>
             </div>
@@ -85,7 +49,10 @@ export function renderHero() {
             </div>
           </div>
 
-          <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          <div class="hero-action-buttons-group">
+            <button id="hero-btn-book-call" class="nav-btn nav-btn-primary" style="font-weight: 700; padding: 0.65rem 1.2rem; border-radius: 10px;">
+              <i class="fa-solid fa-phone-volume"></i> Book a Call
+            </button>
             <a href="tel:${c.phoneRaw}" class="nav-btn" style="background: #10b981; color: #fff; font-weight: 700; border: none; padding: 0.65rem 1.2rem; border-radius: 10px;">
               <i class="fa-solid fa-phone"></i> ${c.phone}
             </a>
@@ -97,34 +64,23 @@ export function renderHero() {
             </button>
           </div>
         </div>
-
-        <div class="hero-stats" style="margin-top: 1.5rem;">
-          <div class="stat-item">
-            <div class="stat-value">15,000+</div>
-            <div class="stat-label">Verified Rental Properties</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value">0% Brokerage</div>
-            <div class="stat-label">Direct Owner Listings Available</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value">4.9 ★</div>
-            <div class="stat-label">Over 45,000+ Happy Tenants</div>
-          </div>
-        </div>
       </div>
     </section>
   `;
 
-  // Attach search button listener
-  document.getElementById('hero-search-btn')?.addEventListener('click', () => {
-    const loc = document.getElementById('hero-locality-select').value;
-    const bhk = document.getElementById('hero-bhk-select').value;
-    const maxPrice = Number(document.getElementById('hero-price-select').value);
+  document.getElementById('hero-place-search-input')?.addEventListener('input', (e) => {
+    state.updateFilter('searchQuery', e.target.value);
+  });
 
-    state.updateFilter('locality', loc);
-    state.updateFilter('bhk', bhk);
-    state.updateFilter('maxPrice', maxPrice);
+  document.getElementById('hero-place-search-btn')?.addEventListener('click', () => {
+    const inputVal = document.getElementById('hero-place-search-input')?.value;
+    if (inputVal !== undefined) {
+      state.updateFilter('searchQuery', inputVal);
+    }
+  });
+
+  document.getElementById('hero-btn-book-call')?.addEventListener('click', () => {
+    state.openModal('book-call');
   });
 
   document.getElementById('hero-btn-view-card')?.addEventListener('click', () => {

@@ -6,6 +6,7 @@ export function renderFilters() {
   if (!root) return;
 
   const f = state.filters;
+  const popularLocalities = ["All", "Indiranagar", "Koramangala", "HSR Layout", "Whitefield", "Sarjapur Road", "Electronic City Phase 1", "Hebbal", "Malleshwaram", "Murugeshpalaya", "Jayanagar", "JP Nagar", "BTM Layout", "Marathahalli", "Yelahanka", "Bellandur"];
   const popularAmenities = ["Power Backup", "Gym", "Swimming Pool", "24/7 Security", "EV Charger", "Clubhouse", "Pet Friendly"];
 
   root.innerHTML = `
@@ -16,29 +17,18 @@ export function renderFilters() {
       <button id="btn-reset-all" class="btn-reset-filters">Reset All</button>
     </div>
 
-    <!-- Keyword Search -->
+    <!-- Search Place / Keyword -->
     <div class="filter-group">
-      <label class="filter-label">Keyword Search</label>
+      <label class="filter-label">Search Place / Keyword</label>
       <div style="position: relative;">
         <input 
           type="text" 
           id="filter-search-input" 
-          placeholder="e.g. Penthouse, Toit, Lakeview..." 
+          placeholder="e.g. Indiranagar, Murugeshpalaya, Penthouse..." 
           value="${f.searchQuery}"
           class="input-field-group"
           style="width: 100%; padding: 0.65rem 0.85rem; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-primary);"
         />
-      </div>
-    </div>
-
-    <!-- Locality Pills -->
-    <div class="filter-group">
-      <label class="filter-label">Locality</label>
-      <div class="filter-pills">
-        <button class="pill-btn ${f.locality === 'All' ? 'active' : ''}" data-loc="All">All</button>
-        ${LOCALITIES.map(loc => `
-          <button class="pill-btn ${f.locality === loc ? 'active' : ''}" data-loc="${loc}">${loc}</button>
-        `).join('')}
       </div>
     </div>
 
@@ -86,35 +76,6 @@ export function renderFilters() {
         <button class="pill-btn ${f.furnishing === 'Semi-Furnished' ? 'active' : ''}" data-furnish="Semi-Furnished">Semi</button>
       </div>
     </div>
-
-    <!-- Special Toggles -->
-    <div class="filter-group">
-      <label class="filter-label">Special Preferences</label>
-      <label class="custom-checkbox">
-        <input type="checkbox" id="chk-zero-brokerage" ${f.zeroBrokerageOnly ? 'checked' : ''} />
-        <span>⚡ 0% Brokerage (Direct Owner)</span>
-      </label>
-      <label class="custom-checkbox">
-        <input type="checkbox" id="chk-verified" ${f.verifiedOnly ? 'checked' : ''} />
-        <span>🛡️ 100% Verified Properties</span>
-      </label>
-    </div>
-
-    <!-- Amenities Checklist -->
-    <div class="filter-group">
-      <label class="filter-label">Key Amenities</label>
-      ${popularAmenities.map(amenity => `
-        <label class="custom-checkbox">
-          <input 
-            type="checkbox" 
-            class="chk-amenity" 
-            value="${amenity}" 
-            ${f.amenities.includes(amenity) ? 'checked' : ''} 
-          />
-          <span>${amenity}</span>
-        </label>
-      `).join('')}
-    </div>
   `;
 
   // Attach Event Listeners
@@ -125,13 +86,6 @@ export function renderFilters() {
   const searchInput = document.getElementById('filter-search-input');
   searchInput?.addEventListener('input', (e) => {
     state.updateFilter('searchQuery', e.target.value);
-  });
-
-  // Locality pill clicks
-  root.querySelectorAll('[data-loc]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      state.updateFilter('locality', btn.dataset.loc);
-    });
   });
 
   // BHK pill clicks
@@ -151,20 +105,5 @@ export function renderFilters() {
   // Price slider
   document.getElementById('filter-price-slider')?.addEventListener('input', (e) => {
     state.updateFilter('maxPrice', Number(e.target.value));
-  });
-
-  // Checkbox toggles
-  document.getElementById('chk-zero-brokerage')?.addEventListener('change', (e) => {
-    state.updateFilter('zeroBrokerageOnly', e.target.checked);
-  });
-
-  document.getElementById('chk-verified')?.addEventListener('change', (e) => {
-    state.updateFilter('verifiedOnly', e.target.checked);
-  });
-
-  root.querySelectorAll('.chk-amenity').forEach(chk => {
-    chk.addEventListener('change', () => {
-      state.toggleAmenity(chk.value);
-    });
   });
 }

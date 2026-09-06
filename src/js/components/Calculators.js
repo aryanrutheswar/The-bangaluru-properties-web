@@ -1,37 +1,5 @@
-import { TECH_HUBS } from '../../data/properties.js';
-
 export function renderCalculators() {
-  const guideRoot = document.getElementById('guide-root');
   const calcRoot = document.getElementById('calculator-root');
-
-  if (guideRoot) {
-    guideRoot.innerHTML = `
-      <div class="section-box">
-        <div class="section-header">
-          <h2 class="section-title font-heading">
-            <i class="fa-solid fa-map-location-dot" style="color: var(--accent-emerald);"></i> Bengaluru Tech Hub Proximity Guide
-          </h2>
-          <p class="section-subtitle">
-            Find rental homes situated within 15-minute commute times of Bangalore's top IT parks & business enclaves.
-          </p>
-        </div>
-
-        <div class="hubs-grid">
-          ${TECH_HUBS.map(hub => `
-            <div class="hub-card">
-              <div class="hub-icon">
-                <i class="fa-solid fa-laptop-code"></i>
-              </div>
-              <div class="hub-info">
-                <h4>${hub.name}</h4>
-                <p>📍 ${hub.location} • ~${hub.dist} avg commute</p>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    `;
-  }
 
   if (calcRoot) {
     calcRoot.innerHTML = `

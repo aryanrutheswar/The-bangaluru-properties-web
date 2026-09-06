@@ -120,7 +120,10 @@ export function renderPropertyModal() {
                 <div style="font-size: 0.85rem; color: var(--text-secondary);">${p.ownerPhone}</div>
               </div>
 
-              <div style="display: flex; gap: 0.75rem;">
+              <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <button id="btn-modal-book-call" class="nav-btn" style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #10b981; font-weight: 700;">
+                  <i class="fa-solid fa-phone-volume"></i> Book a Call
+                </button>
                 <a href="tel:${p.ownerPhone}" class="nav-btn nav-btn-primary">
                   <i class="fa-solid fa-phone"></i> Call Now
                 </a>
@@ -140,6 +143,10 @@ export function renderPropertyModal() {
         const mainImg = document.getElementById('gallery-current-img');
         if (mainImg) mainImg.src = thumb.dataset.imgSrc;
       });
+    });
+
+    document.getElementById('btn-modal-book-call')?.addEventListener('click', () => {
+      state.openModal('book-call', p);
     });
 
     document.getElementById('btn-modal-schedule-tour')?.addEventListener('click', () => {
@@ -225,7 +232,7 @@ export function renderPropertyModal() {
 
     root.innerHTML = `
       <div class="modal-overlay" id="modal-backdrop">
-        <div class="modal-card" style="max-width: 620px; background: #0b0f19; border: 2px solid rgba(245, 158, 11, 0.4); box-shadow: 0 20px 50px rgba(0,0,0,0.8); padding: 0; overflow: hidden; border-radius: 20px;">
+        <div class="modal-card" style="max-width: 780px; width: 92vw; max-height: 90vh; overflow-y: auto; background: #0b0f19; border: 2px solid rgba(245, 158, 11, 0.5); box-shadow: 0 25px 60px rgba(0,0,0,0.85); padding: 0; border-radius: 20px;">
           <button class="modal-close-btn" id="btn-close-modal" style="top: 15px; right: 15px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid rgba(255,255,255,0.2); z-index: 10;">
             <i class="fa-solid fa-xmark"></i>
           </button>
@@ -288,15 +295,15 @@ export function renderPropertyModal() {
               </div>
 
               <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 1rem; border-radius: 12px; display: flex; align-items: center; gap: 1rem;">
-                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(16,185,129,0.15); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">
-                  <i class="fa-solid fa-phone"></i>
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(37,211,102,0.15); color: #25D366; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                  <i class="fa-brands fa-whatsapp"></i>
                 </div>
                 <div style="flex-grow: 1;">
-                  <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 600;">PHONE NUMBER</div>
+                  <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 600;">WHATSAPP & PHONE NUMBER</div>
                   <div style="font-size: 1.1rem; font-weight: 800; color: #f8fafc;">${c.phone}</div>
                 </div>
-                <a href="tel:${c.phoneRaw}" class="nav-btn nav-btn-primary" style="padding: 0.4rem 0.9rem; font-size: 0.85rem;">
-                  Call Now
+                <a href="https://wa.me/${c.whatsapp.replace('+', '')}?text=Hello%20V.%20Ramana,%20I%20want%20to%20inquire%20about%20properties%20in%20Bangalore." target="_blank" class="nav-btn" style="background: #25D366; color: #fff; border: none; font-weight: 800; padding: 0.45rem 1rem; font-size: 0.85rem; border-radius: 10px;">
+                  <i class="fa-brands fa-whatsapp"></i> WhatsApp
                 </a>
               </div>
 
@@ -362,6 +369,121 @@ export function renderPropertyModal() {
       }).catch(() => {
         showToast('📋 V. RAMANA (+91 80504 07710)');
       });
+    });
+  } else if (state.activeModal === 'book-call') {
+    const today = new Date().toISOString().split('T')[0];
+    const c = state.contactInfo;
+
+    root.innerHTML = `
+      <div class="modal-overlay" id="modal-backdrop">
+        <div class="modal-card" style="max-width: 620px; width: 92vw; max-height: 90vh; overflow-y: auto; background: #0f172a; border: 2px solid rgba(16, 185, 129, 0.5); box-shadow: 0 25px 60px rgba(0,0,0,0.85); border-radius: 20px;">
+          <button class="modal-close-btn" id="btn-close-modal" style="top: 15px; right: 15px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid rgba(255,255,255,0.2); z-index: 10;">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+
+          <div class="modal-body" style="padding: 1.75rem;">
+            <!-- Header -->
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">
+              <div style="width: 50px; height: 50px; border-radius: 14px; background: linear-gradient(135deg, #10b981, #059669); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);">
+                <i class="fa-solid fa-phone-volume"></i>
+              </div>
+              <div>
+                <h3 class="font-heading" style="font-size: 1.4rem; color: #fff; line-height: 1.2;">Book a Call with Proprietor</h3>
+                <p style="font-size: 0.85rem; color: #10b981; font-weight: 700; margin-top: 2px;">
+                  Direct Callback from ${c.proprietor} (${c.phone})
+                </p>
+              </div>
+            </div>
+
+            <form id="form-book-call" style="display: flex; flex-direction: column; gap: 1.25rem;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="input-field-group">
+                  <label style="font-weight: 700; color: #e2e8f0;">Your Full Name *</label>
+                  <input type="text" id="book-call-name" placeholder="e.g. Anand Sharma" required style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: #fff; padding: 0.75rem; border-radius: 10px;" />
+                </div>
+                <div class="input-field-group">
+                  <label style="font-weight: 700; color: #e2e8f0;">Mobile Number *</label>
+                  <input type="tel" id="book-call-phone" placeholder="+91 98765 43210" required style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: #fff; padding: 0.75rem; border-radius: 10px;" />
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="input-field-group">
+                  <label style="font-weight: 700; color: #e2e8f0;">Preferred Service</label>
+                  <select id="book-call-service" style="background: rgba(15,23,42,0.9); border: 1px solid var(--border-color); color: #fff; padding: 0.75rem; border-radius: 10px;">
+                    <option value="Residential Rental">Residential Rental (Flat/House)</option>
+                    <option value="Commercial Office Space">Commercial Office Space</option>
+                    <option value="Godown / Warehouse">Godown / Warehouse Space</option>
+                    <option value="Long Term Lease">Long Term Lease</option>
+                    <option value="General Property Consultation">General Property Consultation</option>
+                  </select>
+                </div>
+                <div class="input-field-group">
+                  <label style="font-weight: 700; color: #e2e8f0;">Preferred Locality</label>
+                  <input type="text" id="book-call-locality" placeholder="e.g. Murugeshpalaya, Indiranagar" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: #fff; padding: 0.75rem; border-radius: 10px;" />
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="input-field-group">
+                  <label style="font-weight: 700; color: #e2e8f0;">Preferred Call Date *</label>
+                  <input type="date" id="book-call-date" min="${today}" value="${today}" required style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: #fff; padding: 0.75rem; border-radius: 10px;" />
+                </div>
+                <div class="input-field-group">
+                  <label style="font-weight: 700; color: #e2e8f0;">Preferred Time Slot</label>
+                  <select id="book-call-slot" style="background: rgba(15,23,42,0.9); border: 1px solid var(--border-color); color: #fff; padding: 0.75rem; border-radius: 10px;">
+                    <option value="Morning (09:00 AM - 12:00 PM)">Morning (09:00 AM - 12:00 PM)</option>
+                    <option value="Afternoon (12:00 PM - 04:00 PM)">Afternoon (12:00 PM - 04:00 PM)</option>
+                    <option value="Evening (04:00 PM - 08:00 PM)">Evening (04:00 PM - 08:00 PM)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="input-field-group">
+                <label style="font-weight: 700; color: #e2e8f0;">Notes / Requirements (Optional)</label>
+                <textarea id="book-call-notes" rows="2" placeholder="e.g. Budget ₹30k - ₹40k, 2BHK furnished near Tech Park..." style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: #fff; padding: 0.75rem; border-radius: 10px; resize: vertical;"></textarea>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem; flex-wrap: wrap;">
+                <button type="submit" class="nav-btn nav-btn-primary" style="flex: 1; min-width: 180px; justify-content: center; padding: 0.9rem; font-size: 1rem; font-weight: 800;">
+                  <i class="fa-solid fa-phone-volume"></i> Confirm & Book Callback
+                </button>
+                <a href="https://wa.me/${c.whatsapp.replace('+', '')}?text=Hello%20V.%20Ramana,%20I%20would%20like%20to%20book%20a%20call%20regarding%20properties." target="_blank" class="nav-btn" style="background: #25D366; color: #fff; font-weight: 800; padding: 0.9rem; border-radius: 10px; border: none; text-decoration: none;">
+                  <i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('form-book-call')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('book-call-name').value.trim();
+      const phone = document.getElementById('book-call-phone').value.trim();
+      const service = document.getElementById('book-call-service').value;
+      const locality = document.getElementById('book-call-locality').value.trim() || 'Bangalore';
+      const date = document.getElementById('book-call-date').value;
+      const slot = document.getElementById('book-call-slot').value;
+      const notes = document.getElementById('book-call-notes').value.trim();
+
+      // Store in State -> automatically updates Admin Portal leads!
+      state.addLead({
+        tenantName: name,
+        tenantPhone: phone,
+        propertyTitle: `Booked Call: ${service}`,
+        locality: locality,
+        date: date,
+        notes: `Call Scheduled for ${date} [${slot}]. Service: ${service}. ${notes ? 'Notes: ' + notes : ''}`
+      });
+
+      state.closeModal();
+      showToast(`📞 Call Request Booked! Proprietor ${c.proprietor} will contact ${name} on ${date} (${slot}).`);
+
+      // Launch direct WhatsApp confirmation
+      const waMsg = `Hello V. Ramana, I have requested a callback on ${date} (${slot}) regarding ${service} in ${locality}.\nName: ${name}\nPhone: ${phone}${notes ? '\nNote: ' + notes : ''}`;
+      window.open(`https://wa.me/${c.whatsapp.replace('+', '')}?text=${encodeURIComponent(waMsg)}`, '_blank');
     });
   }
 
