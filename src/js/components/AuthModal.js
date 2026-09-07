@@ -280,6 +280,39 @@ export function renderAuthModal() {
     showToast(`💬 WhatsApp opening with verification OTP: ${otp}`);
   });
 
+  // OTP Digit auto-advance & paste handler
+  const otpInputs = root.querySelectorAll('.otp-digit-input');
+  otpInputs.forEach((input, index) => {
+    input.addEventListener('input', (e) => {
+      const val = e.target.value;
+      if (val && index < otpInputs.length - 1) {
+        otpInputs[index + 1].focus();
+      }
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !e.target.value && index > 0) {
+        otpInputs[index - 1].focus();
+      }
+    });
+  });
+
+  // Verify OTP Form Submit
+  document.getElementById('form-verify-otp')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const enteredCode = Array.from(root.querySelectorAll('.otp-digit-input')).map(i => i.value.trim()).join('');
+    if (enteredCode.length !== 6) {
+      showToast('⚠️ Please enter all 6 digits of the OTP code.');
+      return;
+    }
+    const verified = state.verifyOTP(enteredCode);
+    if (verified) {
+      showToast('🎉 Signed in successfully!');
+    } else {
+      showToast('❌ Invalid verification OTP! Please check again.');
+    }
+  });
+
   // Modal Close Listeners
   document.getElementById('btn-close-modal')?.addEventListener('click', () => {
     state.closeModal();

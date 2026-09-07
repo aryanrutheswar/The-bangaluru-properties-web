@@ -743,6 +743,18 @@ function renderAdminTabContent(tab, props, leads, c, totalRent, zeroBrokerageCou
             <i class="fa-solid fa-floppy-disk"></i> Save Proprietor Settings
           </button>
         </form>
+
+        <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+          <h5 style="margin: 0 0 0.5rem 0; font-size: 1.05rem; font-weight: 700; color: #ef4444; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-rotate-left"></i> Data Reset & Maintenance
+          </h5>
+          <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 1rem;">
+            Reset property listings back to the default sample dataset if you ever need to restore deleted test properties.
+          </p>
+          <button type="button" id="btn-reset-default-properties" class="nav-btn" style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; font-size: 0.9rem;">
+            <i class="fa-solid fa-arrow-rotate-left"></i> Restore Default Sample Properties
+          </button>
+        </div>
       </div>
     `;
   }
@@ -956,6 +968,13 @@ function attachAdminTabEvents(tab, root) {
       });
 
       showToast('💾 Proprietor settings updated across the site!');
+    });
+
+    document.getElementById('btn-reset-default-properties')?.addEventListener('click', () => {
+      if (confirm('Are you sure you want to reset all property listings to the original default dataset? Custom added or deleted properties will be reset.')) {
+        state.resetPropertiesToDefault();
+        showToast('🔄 Properties restored to default sample data.');
+      }
     });
   }
 }

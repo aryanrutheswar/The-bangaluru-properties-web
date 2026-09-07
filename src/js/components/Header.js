@@ -56,7 +56,7 @@ export function renderHeader() {
             </button>
           `}
 
-          <button id="btn-contact-card" class="nav-btn" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #f59e0b;" title="Contact Proprietor V. RAMANA">
+          <button id="btn-contact-card" class="nav-btn" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #f59e0b; font-size: 0.78rem; padding: 0.35rem 0.65rem; border-radius: 6px; font-weight: 600;" title="Contact Proprietor V. RAMANA">
             <i class="fa-solid fa-address-card"></i>
             <span class="btn-text-full">V. RAMANA (+91 80504 07710)</span>
             <span class="btn-text-mobile">V. RAMANA</span>

@@ -2,8 +2,10 @@ import { PROPERTIES_DATA } from '../data/properties.js';
 
 class AppState {
   constructor() {
-    this.allProperties = [...PROPERTIES_DATA];
-    this.filteredProperties = [...PROPERTIES_DATA];
+    // Local Storage Properties
+    const savedProps = localStorage.getItem('tbp_properties');
+    this.allProperties = savedProps ? JSON.parse(savedProps) : [...PROPERTIES_DATA];
+    this.filteredProperties = [...this.allProperties];
     
     this.filters = {
       searchQuery: '',
@@ -30,7 +32,8 @@ class AppState {
     this.theme = 'light';
 
     // Business Contact Details (V. RAMANA / The Bangalore Properties)
-    this.contactInfo = {
+    const savedContactInfo = localStorage.getItem('tbp_contact_info');
+    const defaultContactInfo = {
       name: "The Bangalore Properties",
       proprietor: "V. RAMANA",
       role: "Proprietor",
@@ -43,6 +46,7 @@ class AppState {
       slogan: "YOUR PROPERTY, OUR PRIORITY.",
       services: ["RESIDENTIAL RENT", "COMMERCIAL RENT", "OFFICE SPACE RENT", "GODOWN SPACE RENT", "LONG TERM LEASE RENT"]
     };
+    this.contactInfo = savedContactInfo ? JSON.parse(savedContactInfo) : defaultContactInfo;
 
     // Authentication State
     const savedUser = localStorage.getItem('tbp_user');
@@ -358,6 +362,21 @@ class AppState {
       ...newProp
     };
     this.allProperties.unshift(propertyWithId);
+    this.saveProperties();
+    this.notify();
+  }
+
+  saveProperties() {
+    try {
+      localStorage.setItem('tbp_properties', JSON.stringify(this.allProperties));
+    } catch (e) {
+      console.error('Failed to save properties to localStorage:', e);
+    }
+  }
+
+  resetPropertiesToDefault() {
+    this.allProperties = [...PROPERTIES_DATA];
+    this.saveProperties();
     this.notify();
   }
 
@@ -559,6 +578,7 @@ class AppState {
 
   deleteProperty(propertyId) {
     this.allProperties = this.allProperties.filter(p => p.id !== propertyId);
+    this.saveProperties();
     this.notify();
   }
 
@@ -566,6 +586,7 @@ class AppState {
     const prop = this.allProperties.find(p => p.id === propertyId);
     if (prop) {
       prop[flagName] = !prop[flagName];
+      this.saveProperties();
       this.notify();
     }
   }
@@ -599,6 +620,11 @@ class AppState {
 
   updateContactInfo(newInfo) {
     this.contactInfo = { ...this.contactInfo, ...newInfo };
+    try {
+      localStorage.setItem('tbp_contact_info', JSON.stringify(this.contactInfo));
+    } catch (e) {
+      console.error('Failed to save contact info to localStorage:', e);
+    }
     this.notify();
   }
 }

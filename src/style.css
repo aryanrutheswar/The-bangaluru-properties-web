@@ -188,15 +188,24 @@ button {
 .nav-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1.2rem;
-  border-radius: 10px;
+  gap: 0.4rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 8px;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   transition: all 0.2s ease;
   border: 1px solid var(--border-color);
   color: var(--text-primary);
   background: var(--bg-glass);
+  white-space: nowrap;
+}
+
+.btn-text-full {
+  display: inline;
+}
+
+.btn-text-mobile {
+  display: none;
 }
 
 .nav-btn:hover {
