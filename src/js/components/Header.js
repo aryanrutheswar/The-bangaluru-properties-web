@@ -6,7 +6,7 @@ export function renderHeader() {
 
   const favCount = state.favorites.length;
   const isDark = state.theme === 'dark';
-  const isAdmin = state.isAdminLoggedIn || state.currentUser?.email === 'vramanarentals@gmail.com';
+  const isAdmin = typeof state.isAdmin === 'function' ? state.isAdmin() : Boolean(state.currentUser && state.currentUser.email !== 'vramanarentals@gmail.com' && (state.isAdminLoggedIn || state.currentUser.isAdmin || state.currentUser.email === 'ramuramana92@gmail.com'));
 
   root.innerHTML = `
     <header class="header-nav">
@@ -32,6 +32,13 @@ export function renderHeader() {
           </button>
 
           ${isAdmin ? `
+            <!-- Dedicated Mobile & Desktop Upload Property Button (Admin Only) -->
+            <button id="btn-header-upload-prop" class="nav-btn btn-upload-shortcut" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(99, 102, 241, 0.2)); border: 1.5px solid var(--accent-emerald); color: var(--accent-emerald); font-weight: 800; box-shadow: 0 2px 10px rgba(16, 185, 129, 0.2);" title="Upload & Post a Property from Mobile or Laptop">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <span class="btn-text-full">+ Upload Property</span>
+              <span class="btn-text-mobile">+ Upload</span>
+            </button>
+
             <button id="btn-header-admin-portal" class="nav-btn btn-admin-shortcut" style="background: rgba(16, 185, 129, 0.18); border: 1px solid #10b981; color: #10b981; font-weight: 800;" title="Open Admin Dashboard">
               <i class="fa-solid fa-user-shield"></i>
               <span class="btn-text-full">Admin Dashboard</span>
@@ -66,18 +73,22 @@ export function renderHeader() {
             <i class="fa-solid ${isDark ? 'fa-sun' : 'fa-moon'}"></i>
             <span class="hide-mobile-small">${isDark ? 'Light' : 'Dark'}</span>
           </button>
-
-          <button id="btn-view-favorites" class="nav-btn" title="View Saved Homes">
-            <i class="fa-solid fa-heart" style="color: #ef4444;"></i>
-            <span class="hide-mobile-small">Saved</span>
-            <span class="fav-badge">${favCount}</span>
-          </button>
         </div>
       </div>
     </header>
   `;
 
   // Attach Event Listeners
+  document.getElementById('btn-header-upload-prop')?.addEventListener('click', () => {
+    if (isAdmin) {
+      state.setAdminTab('add-property');
+      state.openModal('admin-portal');
+    } else {
+      state.pendingAdminTab = 'add-property';
+      state.openModal('admin-portal');
+    }
+  });
+
   document.getElementById('btn-header-auth')?.addEventListener('click', () => {
     state.openModal('auth-signin');
   });
@@ -100,16 +111,6 @@ export function renderHeader() {
 
   document.getElementById('btn-theme-toggle')?.addEventListener('click', () => {
     state.toggleTheme();
-  });
-
-  document.getElementById('btn-view-favorites')?.addEventListener('click', () => {
-    if (state.favorites.length === 0) {
-      alert('You have not saved any properties yet! Click the heart icon on any listing card to save it.');
-      return;
-    }
-    const favProps = state.allProperties.filter(p => state.favorites.includes(p.id));
-    state.filteredProperties = favProps;
-    state.notify();
   });
 }
 
