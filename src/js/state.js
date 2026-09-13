@@ -2,9 +2,21 @@ import { PROPERTIES_DATA } from '../data/properties.js';
 
 class AppState {
   constructor() {
+    // Force purge old cached properties from localStorage for a clean, fresh start
+    try {
+      const CACHE_VERSION = 'v5_fresh_start';
+      if (localStorage.getItem('tbp_sync_ver') !== CACHE_VERSION) {
+        localStorage.removeItem('tbp_properties');
+        localStorage.removeItem('tbp_deleted_ids');
+        localStorage.removeItem('tbp_leads');
+        localStorage.removeItem('tbp_favorites');
+        localStorage.setItem('tbp_sync_ver', CACHE_VERSION);
+      }
+    } catch (e) {}
+
     // Local Storage Properties
     const savedProps = localStorage.getItem('tbp_properties');
-    this.allProperties = savedProps ? JSON.parse(savedProps) : [...PROPERTIES_DATA];
+    this.allProperties = savedProps ? JSON.parse(savedProps) : [];
     this.filteredProperties = [...this.allProperties];
     
     this.filters = {
@@ -20,7 +32,7 @@ class AppState {
       amenities: []
     };
 
-    this.sortBy = 'featured'; // 'featured', 'price-low', 'price-high', 'newest'
+    this.sortBy = 'newest'; // 'newest', 'price-low', 'price-high'
     this.viewMode = 'grid'; // 'grid' or 'list'
     
     // Local Storage Favorites
@@ -586,6 +598,15 @@ class AppState {
     const prop = this.allProperties.find(p => p.id === propertyId);
     if (prop) {
       prop[flagName] = !prop[flagName];
+      this.saveProperties();
+      this.notify();
+    }
+  }
+
+  updatePropertyFloor(propertyId, floor) {
+    const prop = this.allProperties.find(p => p.id === propertyId);
+    if (prop) {
+      prop.floor = floor;
       this.saveProperties();
       this.notify();
     }
