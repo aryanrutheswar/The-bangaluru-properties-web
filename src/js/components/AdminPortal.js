@@ -1,6 +1,8 @@
 import { LOCALITIES } from '../../data/properties.js';
 import { state } from '../state.js';
+import { api } from '../api.js';
 import { showToast } from './Toast.js';
+import { compressImage, processAndCompressImages } from '../utils/imageCompressor.js';
 
 export function renderAdminPortal() {
   if (state.activeModal !== 'admin-portal') return;
@@ -20,92 +22,150 @@ export function renderAdminPortal() {
 function renderAdminLoginForm(root) {
   root.innerHTML = `
     <div class="modal-overlay" id="admin-modal-backdrop">
-      <div class="modal-card admin-login-card">
+      <div class="modal-card admin-login-card" style="max-width: 440px; background: var(--bg-surface); border: 2px solid rgba(239, 68, 68, 0.4); box-shadow: 0 20px 50px rgba(0,0,0,0.7); border-radius: 20px;">
         <button class="modal-close-btn" id="btn-close-admin-modal">
           <i class="fa-solid fa-xmark"></i>
         </button>
 
-        <div class="modal-body" style="padding: 2rem 1.5rem;">
-          <div class="admin-login-icon-badge">
-            <i class="fa-solid fa-user-shield"></i>
+        <div class="modal-body" style="padding: 2.25rem 1.75rem;">
+          <div style="width: 64px; height: 64px; border-radius: 20px; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 1.25rem auto; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.25);">
+            <i class="fa-solid fa-lock"></i>
           </div>
 
-          <h3 class="font-heading" style="font-size: 1.6rem; margin-bottom: 0.35rem; text-align: center;">Proprietor Admin Access</h3>
-          <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1.5rem; text-align: center;">
-            Enter admin credentials to manage properties, tenant leads & proprietor settings.
-          </p>
-
-          <!-- Quick Demo Login Button -->
-          <div style="background: rgba(16, 185, 129, 0.1); border: 1px dashed var(--accent-emerald); border-radius: 12px; padding: 0.85rem; margin-bottom: 1.25rem; text-align: center;">
-            <div style="font-size: 0.8rem; color: var(--accent-emerald); font-weight: 700; margin-bottom: 0.4rem;">
-              <i class="fa-solid fa-bolt"></i> Testing or Demoing?
+          <div style="text-align: center; margin-bottom: 1.5rem;">
+            <div style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 0.25rem 0.65rem; border-radius: 20px; border: 1px solid rgba(239, 68, 68, 0.25); margin-bottom: 0.5rem;">
+              <i class="fa-solid fa-shield-halved"></i> Protected Path: /admin
             </div>
-            <button type="button" id="btn-quick-demo-login" class="nav-btn nav-btn-primary" style="width: 100%; justify-content: center; padding: 0.6rem; font-size: 0.88rem;">
-              <i class="fa-solid fa-key"></i> Quick Demo Admin Login
-            </button>
+            <h3 class="font-heading" style="font-size: 1.5rem; margin-bottom: 0.35rem; font-weight: 800;">Administrator Access</h3>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.4;">
+              This area is strictly restricted to Proprietor V. RAMANA. Please enter your administrator credentials stored in your secure environment.
+            </p>
           </div>
 
-          <form id="admin-login-form" style="display: flex; flex-direction: column; gap: 1rem;">
+          <div id="admin-auth-error-box" style="display: none; background: rgba(239, 68, 68, 0.12); border: 1px solid #ef4444; border-radius: 10px; padding: 0.75rem; margin-bottom: 1rem; color: #ef4444; font-size: 0.85rem; text-align: center;">
+            <i class="fa-solid fa-triangle-exclamation"></i> <span id="admin-auth-error-msg">Invalid email or password!</span>
+          </div>
+
+          <form id="admin-login-form" style="display: flex; flex-direction: column; gap: 1.1rem;">
             <div class="input-field-group" style="text-align: left;">
-              <label style="font-weight: 700; font-size: 0.85rem;">Admin Email</label>
-              <input 
-                type="email" 
-                id="admin-email-input" 
-                placeholder="vramanarentals@gmail.com" 
-                value="vramanarentals@gmail.com"
-                required 
-                style="width: 100%; padding: 0.85rem; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-primary); font-size: 0.95rem;"
-              />
+              <label style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 0.35rem; display: block;">
+                Admin Email
+              </label>
+              <div style="position: relative;">
+                <i class="fa-solid fa-envelope" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                <input 
+                  type="email" 
+                  id="admin-email-input" 
+                  placeholder="admin@example.com" 
+                  required 
+                  autocomplete="username"
+                  style="width: 100%; padding: 0.85rem 0.85rem 0.85rem 2.5rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-primary); font-size: 0.95rem; font-weight: 500;"
+                />
+              </div>
             </div>
 
             <div class="input-field-group" style="text-align: left;">
-              <label style="font-weight: 700; font-size: 0.85rem;">Admin Password</label>
-              <input 
-                type="password" 
-                id="admin-pass-input" 
-                placeholder="ramana rentals" 
-                value="ramana rentals"
-                required 
-                style="width: 100%; padding: 0.85rem; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-primary); font-size: 0.95rem;"
-              />
+              <label style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 0.35rem; display: block;">
+                Admin Password
+              </label>
+              <div style="position: relative;">
+                <i class="fa-solid fa-key" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                <input 
+                  type="password" 
+                  id="admin-pass-input" 
+                  placeholder="Enter administrator password" 
+                  required 
+                  autocomplete="current-password"
+                  style="width: 100%; padding: 0.85rem 2.8rem 0.85rem 2.5rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-primary); font-size: 0.95rem; font-weight: 500;"
+                />
+                <button type="button" id="btn-toggle-admin-pass" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.9rem;" title="Toggle password visibility">
+                  <i class="fa-solid fa-eye" id="icon-admin-pass-eye"></i>
+                </button>
+              </div>
             </div>
 
-            <button type="submit" class="nav-btn nav-btn-primary" style="width: 100%; justify-content: center; padding: 0.9rem; font-size: 1rem; margin-top: 0.25rem; font-weight: 700;">
-              <i class="fa-solid fa-right-to-bracket"></i> Login to Admin Portal
+            <button type="submit" id="btn-submit-admin-login" class="nav-btn nav-btn-primary" style="width: 100%; justify-content: center; padding: 0.95rem; font-size: 1rem; margin-top: 0.25rem; font-weight: 700; border-radius: 12px; gap: 0.5rem; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);">
+              <i class="fa-solid fa-lock-open"></i> Authenticate & Unlock Portal
             </button>
           </form>
+
+          <div style="text-align: center; margin-top: 1.25rem;">
+            <a href="/" id="btn-return-home" style="font-size: 0.82rem; color: var(--text-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
+              <i class="fa-solid fa-arrow-left"></i> Return to Homepage
+            </a>
+          </div>
         </div>
       </div>
     </div>
   `;
 
-  document.getElementById('btn-quick-demo-login')?.addEventListener('click', () => {
-    state.adminLogin('vramanarentals@gmail.com', 'ramana rentals');
-    showToast('⚡ Welcome! Admin Portal Unlocked.');
+  const passInput = document.getElementById('admin-pass-input');
+  const togglePassBtn = document.getElementById('btn-toggle-admin-pass');
+  const eyeIcon = document.getElementById('icon-admin-pass-eye');
+
+  togglePassBtn?.addEventListener('click', () => {
+    if (passInput) {
+      if (passInput.type === 'password') {
+        passInput.type = 'text';
+        eyeIcon?.classList.replace('fa-eye', 'fa-eye-slash');
+      } else {
+        passInput.type = 'password';
+        eyeIcon?.classList.replace('fa-eye-slash', 'fa-eye');
+      }
+    }
   });
 
-  document.getElementById('admin-login-form')?.addEventListener('submit', (e) => {
+  document.getElementById('admin-login-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const email = document.getElementById('admin-email-input').value;
-    const pass = document.getElementById('admin-pass-input').value;
-    if (state.adminLogin(email, pass)) {
-      showToast('⚡ Welcome! Admin Portal Unlocked.');
+    const email = document.getElementById('admin-email-input').value.trim();
+    const pass = document.getElementById('admin-pass-input').value.trim();
+    const submitBtn = document.getElementById('btn-submit-admin-login');
+    const errBox = document.getElementById('admin-auth-error-box');
+    const errMsg = document.getElementById('admin-auth-error-msg');
+
+    if (errBox) errBox.style.display = 'none';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying credentials...';
+    }
+
+    const success = await state.adminLogin(email, pass);
+    if (success) {
+      if (state.pendingAdminTab) {
+        state.setAdminTab(state.pendingAdminTab);
+        state.pendingAdminTab = null;
+      }
+      showToast('⚡ Administrator Access Granted! Welcome V. RAMANA.');
     } else {
-      showToast('❌ Invalid email or password!');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Authenticate & Unlock Portal';
+      }
+      if (errBox && errMsg) {
+        errMsg.innerText = 'Access Denied: Invalid administrator credentials.';
+        errBox.style.display = 'block';
+      }
+      showToast('❌ Access Denied: Invalid credentials!');
     }
   });
 
   const handleClose = () => {
     state.closeModal();
     const path = window.location.pathname.toLowerCase().replace(/\/$/, '');
-    if (path === '/admin' || window.location.hash.toLowerCase() === '#admin') {
+    if (path === '/admin' || window.location.hash.toLowerCase() === '#admin' || window.location.hash.toLowerCase() === '#/admin') {
       history.replaceState(null, '', '/');
     }
   };
 
   document.getElementById('btn-close-admin-modal')?.addEventListener('click', handleClose);
+  document.getElementById('btn-return-home')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    handleClose();
+  });
   document.getElementById('admin-modal-backdrop')?.addEventListener('click', (e) => {
-    if (e.target.id === 'admin-modal-backdrop') handleClose();
+    if (e.target.id === 'admin-modal-backdrop') {
+      handleClose();
+    }
   });
 }
 
@@ -115,7 +175,6 @@ function renderAdminDashboard(root) {
   const c = state.contactInfo;
 
   const totalRent = props.reduce((acc, p) => acc + (p.price || 0), 0);
-  const zeroBrokerageCount = props.filter(p => p.zeroBrokerage).length;
   const verifiedCount = props.filter(p => p.isVerified).length;
 
   const activeTab = state.adminTab || 'dashboard';
@@ -171,7 +230,7 @@ function renderAdminDashboard(root) {
 
       <!-- Admin Portal Body View -->
       <div class="admin-body-container">
-        ${renderAdminTabContent(activeTab, props, leads, c, totalRent, zeroBrokerageCount, verifiedCount)}
+        ${renderAdminTabContent(activeTab, props, leads, c, totalRent, verifiedCount)}
       </div>
 
     </div>
@@ -219,7 +278,7 @@ function renderAdminDashboard(root) {
   attachAdminTabEvents(activeTab, root);
 }
 
-function renderAdminTabContent(tab, props, leads, c, totalRent, zeroBrokerageCount, verifiedCount) {
+function renderAdminTabContent(tab, props, leads, c, totalRent, verifiedCount) {
   if (tab === 'dashboard') {
     return `
       <!-- KPI Stats Grid -->
@@ -231,15 +290,6 @@ function renderAdminTabContent(tab, props, leads, c, totalRent, zeroBrokerageCou
           </div>
           <div class="kpi-value">${props.length}</div>
           <div class="kpi-sub">Verified Bengaluru Properties</div>
-        </div>
-
-        <div class="kpi-card kpi-amber">
-          <div class="kpi-header-row">
-            <span class="kpi-title">0% Brokerage</span>
-            <i class="fa-solid fa-bolt kpi-icon"></i>
-          </div>
-          <div class="kpi-value">${zeroBrokerageCount}</div>
-          <div class="kpi-sub">Direct Proprietor Managed</div>
         </div>
 
         <div class="kpi-card kpi-blue">
@@ -309,7 +359,6 @@ function renderAdminTabContent(tab, props, leads, c, totalRent, zeroBrokerageCou
                     <td><span style="font-size: 0.8rem; font-weight: 600;">${p.type}</span></td>
                     <td>
                       <div style="display: flex; gap: 0.25rem;">
-                        ${p.zeroBrokerage ? '<span class="mini-flag mini-flag-amber">0%</span>' : ''}
                         ${p.isVerified ? '<span class="mini-flag mini-flag-emerald">🛡️</span>' : ''}
                       </div>
                     </td>
@@ -412,9 +461,7 @@ function renderAdminTabContent(tab, props, leads, c, totalRent, zeroBrokerageCou
                 <th>Floor</th>
                 <th>Rent / Deposit</th>
                 <th>Furnishing</th>
-                <th>0% Brokerage</th>
                 <th>Verified</th>
-                <th>Featured</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -450,22 +497,15 @@ function renderAdminTabContent(tab, props, leads, c, totalRent, zeroBrokerageCou
                   </td>
                   <td><span style="font-size: 0.82rem;">${p.furnishing}</span></td>
                   <td>
-                    <button class="flag-toggle-btn ${p.zeroBrokerage ? 'active' : ''}" data-flag-prop="${p.id}" data-flag-name="zeroBrokerage">
-                      ${p.zeroBrokerage ? '⚡ Yes (0%)' : 'No'}
-                    </button>
-                  </td>
-                  <td>
                     <button class="flag-toggle-btn ${p.isVerified ? 'active' : ''}" data-flag-prop="${p.id}" data-flag-name="isVerified">
                       ${p.isVerified ? '🛡️ Verified' : 'Unverified'}
                     </button>
                   </td>
                   <td>
-                    <button class="flag-toggle-btn ${p.isFeatured ? 'active' : ''}" data-flag-prop="${p.id}" data-flag-name="isFeatured">
-                      ${p.isFeatured ? '⭐ Featured' : 'Normal'}
-                    </button>
-                  </td>
-                  <td>
                     <div style="display: flex; gap: 0.4rem;">
+                      <button class="btn-admin-edit" data-edit-prop="${p.id}" title="Edit Property Details">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                      </button>
                       <button class="btn-admin-del" data-del-prop="${p.id}" title="Delete Property">
                         <i class="fa-solid fa-trash-can"></i>
                       </button>
@@ -502,20 +542,19 @@ function renderAdminTabContent(tab, props, leads, c, totalRent, zeroBrokerageCou
                   </div>
                   <div style="font-weight: 800; color: var(--accent-emerald); margin-top: 2px; font-size: 0.88rem;">₹${p.price.toLocaleString('en-IN')}/mo</div>
                 </div>
-                <button class="btn-admin-del" data-del-prop="${p.id}" style="align-self: center; flex-shrink: 0;" title="Delete Property">
-                  <i class="fa-solid fa-trash-can"></i>
-                </button>
+                <div style="display: flex; gap: 0.35rem; align-self: center; flex-shrink: 0;">
+                  <button class="btn-admin-edit" data-edit-prop="${p.id}" title="Edit Property Details">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </button>
+                  <button class="btn-admin-del" data-del-prop="${p.id}" title="Delete Property">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>
               </div>
 
-              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.35rem; margin-top: 0.65rem; padding-top: 0.65rem; border-top: 1px dashed var(--border-color);">
-                <button class="flag-toggle-btn ${p.zeroBrokerage ? 'active' : ''}" data-flag-prop="${p.id}" data-flag-name="zeroBrokerage" style="width: 100%; text-align: center; padding: 0.35rem 0.2rem; font-size: 0.72rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                  ${p.zeroBrokerage ? '⚡ 0% Broker' : 'Brokerage'}
-                </button>
-                <button class="flag-toggle-btn ${p.isVerified ? 'active' : ''}" data-flag-prop="${p.id}" data-flag-name="isVerified" style="width: 100%; text-align: center; padding: 0.35rem 0.2rem; font-size: 0.72rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                  ${p.isVerified ? '🛡️ Verified' : 'Unverified'}
-                </button>
-                <button class="flag-toggle-btn ${p.isFeatured ? 'active' : ''}" data-flag-prop="${p.id}" data-flag-name="isFeatured" style="width: 100%; text-align: center; padding: 0.35rem 0.2rem; font-size: 0.72rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                  ${p.isFeatured ? '⭐ Featured' : 'Normal'}
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.65rem; padding-top: 0.65rem; border-top: 1px dashed var(--border-color);">
+                <button class="flag-toggle-btn ${p.isVerified ? 'active' : ''}" data-flag-prop="${p.id}" data-flag-name="isVerified" style="padding: 0.35rem 0.75rem; font-size: 0.78rem;">
+                  ${p.isVerified ? '🛡️ Verified Listing' : 'Unverified Listing'}
                 </button>
               </div>
             </div>
@@ -570,9 +609,9 @@ function renderAdminTabContent(tab, props, leads, c, totalRent, zeroBrokerageCou
             <div class="input-field-group">
               <label>BHK Type</label>
               <select id="admin-p-bhk" class="search-select">
-                <option value="1bhk">1 BHK / Studio</option>
+                <option value="1bhk">1 BHK</option>
                 <option value="2bhk" selected>2 BHK Apartment</option>
-                <option value="3bhk">3 BHK Luxury</option>
+                <option value="3bhk">3 BHK</option>
                 <option value="4bhk">4+ BHK / Villa / Godown</option>
               </select>
             </div>
@@ -581,19 +620,19 @@ function renderAdminTabContent(tab, props, leads, c, totalRent, zeroBrokerageCou
           <div class="responsive-form-row">
             <div class="input-field-group">
               <label>Monthly Rent (₹)</label>
-              <input type="number" id="admin-p-price" placeholder="45000" min="5000" step="1000" required />
+              <input type="number" id="admin-p-price" placeholder="45000" min="5000" step="1000" inputmode="numeric" required />
             </div>
 
             <div class="input-field-group">
               <label>Security Deposit (₹)</label>
-              <input type="number" id="admin-p-deposit" placeholder="180000" min="10000" step="5000" required />
+              <input type="number" id="admin-p-deposit" placeholder="180000" min="10000" step="5000" inputmode="numeric" required />
             </div>
           </div>
 
           <div class="responsive-form-row">
             <div class="input-field-group">
               <label>Built-up Area (Sq Ft)</label>
-              <input type="number" id="admin-p-sqft" placeholder="1350" required />
+              <input type="number" id="admin-p-sqft" placeholder="1350" inputmode="numeric" required />
             </div>
 
             <div class="input-field-group">
@@ -675,26 +714,39 @@ function renderAdminTabContent(tab, props, leads, c, totalRent, zeroBrokerageCou
 
             <div class="input-field-group">
               <label>Owner Phone</label>
-              <input type="tel" id="admin-p-owner-phone" placeholder="e.g. +91 98450 12345" required />
+              <input type="tel" id="admin-p-owner-phone" placeholder="e.g. +91 98450 12345" inputmode="tel" required />
             </div>
           </div>
 
           <div class="input-field-group">
-            <label>Upload Property Photos</label>
-            <input type="file" id="admin-p-file" accept="image/*" multiple style="display: none;" />
-            <div id="admin-p-upload-area" class="admin-dropzone-box">
+            <label style="font-weight: 700; display: block; margin-bottom: 0.35rem;">
+              Upload Property Photos <span style="font-weight: 400; font-size: 0.8rem; color: var(--accent-emerald);">(Mobile Camera & Laptop HD)</span>
+            </label>
+            <input 
+              type="file" 
+              id="admin-p-file" 
+              accept="image/*" 
+              multiple 
+              style="position: absolute; width: 0.1px; height: 0.1px; opacity: 0; overflow: hidden; z-index: -1;" 
+            />
+            <label for="admin-p-file" id="admin-p-upload-area" class="admin-dropzone-box" style="display: block; cursor: pointer; -webkit-tap-highlight-color: transparent;">
               <div style="font-size: 2.2rem; color: var(--accent-emerald); margin-bottom: 0.4rem;">
                 <i class="fa-solid fa-cloud-arrow-up"></i>
               </div>
-              <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary);">Click or Drag & Drop Property Pictures</div>
-              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.25rem;">Supports JPG, PNG, WEBP</div>
-            </div>
+              <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary);">
+                Tap to Select from Mobile Camera / Gallery or Drag & Drop
+              </div>
+              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                ⚡ Auto-optimizes phone camera photos (JPEG, PNG, HEIC, WEBP)
+              </div>
+            </label>
+            <div id="admin-p-upload-status" style="display: none; margin-top: 0.5rem; font-size: 0.85rem; color: var(--accent-emerald); font-weight: 600; text-align: center;"></div>
             <div id="admin-p-image-preview" style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.75rem;"></div>
           </div>
 
           <div class="input-field-group">
             <label>Property Description</label>
-            <textarea id="admin-p-desc" rows="3" style="width: 100%; padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-primary);" required>Spacious modern rental property located in prime Bengaluru locality. Managed directly with 0% brokerage fees.</textarea>
+            <textarea id="admin-p-desc" rows="3" placeholder="Describe property features, floor level, amenities, nearby landmarks, etc." style="width: 100%; padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-primary);" required></textarea>
           </div>
 
           <button type="submit" class="nav-btn nav-btn-primary" style="justify-content: center; padding: 0.9rem; font-size: 1rem;">
@@ -909,10 +961,10 @@ function attachAdminTabEvents(tab, root) {
 
     // Floor select change listeners
     root.querySelectorAll('.admin-floor-select').forEach(select => {
-      select.addEventListener('change', () => {
+      select.addEventListener('change', async () => {
         const propId = select.dataset.propId;
         const newFloor = select.value;
-        state.updatePropertyFloor(propId, newFloor);
+        await state.updatePropertyFloor(propId, newFloor);
         showToast(`🏢 Floor updated to "${newFloor}"!`);
       });
     });
@@ -927,11 +979,25 @@ function attachAdminTabEvents(tab, root) {
     });
 
     root.querySelectorAll('[data-del-prop]').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         const propId = btn.dataset.delProp;
         if (confirm('Are you sure you want to delete this property listing?')) {
-          state.deleteProperty(propId);
-          showToast('🗑️ Property deleted successfully.');
+          const res = await state.deleteProperty(propId);
+          if (res && res.success) {
+            showToast('🗑️ Property deleted successfully from Cloud DB.');
+          } else {
+            showToast(`❌ Delete failed: ${res?.error || 'Unauthorized'}. Please re-login as Admin.`);
+          }
+        }
+      });
+    });
+
+    root.querySelectorAll('[data-edit-prop]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const propId = btn.dataset.editProp;
+        const prop = state.allProperties.find(p => String(p.id) === String(propId));
+        if (prop) {
+          state.openModal('edit-property', prop);
         }
       });
     });
@@ -941,9 +1007,8 @@ function attachAdminTabEvents(tab, root) {
     const fileInput = document.getElementById('admin-p-file');
     const uploadArea = document.getElementById('admin-p-upload-area');
     const previewContainer = document.getElementById('admin-p-image-preview');
+    const statusBox = document.getElementById('admin-p-upload-status');
     let uploadedImages = [];
-
-    uploadArea?.addEventListener('click', () => fileInput?.click());
 
     uploadArea?.addEventListener('dragover', (e) => {
       e.preventDefault();
@@ -970,16 +1035,37 @@ function attachAdminTabEvents(tab, root) {
       }
     });
 
-    function processFiles(files) {
-      files.forEach(file => {
-        if (!file.type.startsWith('image/')) return;
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          uploadedImages.push(event.target.result);
-          renderPreviews();
-        };
-        reader.readAsDataURL(file);
-      });
+    async function processFiles(files) {
+      if (!files || files.length === 0) return;
+      if (statusBox) {
+        statusBox.style.display = 'block';
+        statusBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Optimizing mobile photos for fast upload...';
+      }
+
+      try {
+        const compressedList = await processAndCompressImages(files, (curr, total) => {
+          if (statusBox) {
+            statusBox.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Optimizing photo ${curr} of ${total}...`;
+          }
+        });
+
+        compressedList.forEach(item => {
+          uploadedImages.push(item);
+        });
+
+        if (statusBox) {
+          statusBox.innerHTML = `✅ ${compressedList.length} photo(s) optimized & ready!`;
+          setTimeout(() => {
+            if (statusBox) statusBox.style.display = 'none';
+          }, 2500);
+        }
+      } catch (err) {
+        console.error('Error processing mobile images:', err);
+        showToast('⚠️ Could not process image, please try another file.');
+        if (statusBox) statusBox.style.display = 'none';
+      }
+
+      renderPreviews();
     }
 
     function renderPreviews() {
@@ -988,17 +1074,23 @@ function attachAdminTabEvents(tab, root) {
         previewContainer.innerHTML = '';
         return;
       }
-      previewContainer.innerHTML = uploadedImages.map((img, idx) => `
-        <div style="position: relative; display: inline-block;">
-          <img src="${img}" style="width: 84px; height: 84px; border-radius: 12px; object-fit: cover; border: 2px solid var(--accent-emerald);" />
-          <button type="button" class="btn-remove-img" data-img-idx="${idx}" style="position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 50%; background: #ef4444; color: #fff; border: none; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.4);" title="Remove Image">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-      `).join('');
+      previewContainer.innerHTML = uploadedImages.map((imgItem, idx) => {
+        const src = typeof imgItem === 'string' ? imgItem : imgItem.dataUrl;
+        const sizeKb = imgItem.compressedSize ? `${Math.round(imgItem.compressedSize / 1024)} KB` : '';
+        return `
+          <div style="position: relative; display: inline-block; margin: 4px;">
+            <img src="${src}" style="width: 84px; height: 84px; border-radius: 12px; object-fit: cover; border: 2px solid var(--accent-emerald); display: block;" />
+            ${sizeKb ? `<span style="position: absolute; bottom: 4px; left: 4px; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.65rem; padding: 1px 4px; border-radius: 4px; font-weight: 700;">${sizeKb}</span>` : ''}
+            <button type="button" class="btn-remove-img" data-img-idx="${idx}" style="position: absolute; top: -8px; right: -8px; width: 28px; height: 28px; border-radius: 50%; background: #ef4444; color: #fff; border: 2px solid #fff; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.5); z-index: 10; touch-action: manipulation;" title="Remove Image">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        `;
+      }).join('');
 
       previewContainer.querySelectorAll('[data-img-idx]').forEach(btn => {
         btn.addEventListener('click', (e) => {
+          e.preventDefault();
           e.stopPropagation();
           const idx = Number(btn.dataset.imgIdx);
           uploadedImages.splice(idx, 1);
@@ -1007,8 +1099,14 @@ function attachAdminTabEvents(tab, root) {
       });
     }
 
-    document.getElementById('admin-add-prop-form')?.addEventListener('submit', (e) => {
+    document.getElementById('admin-add-prop-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving property...';
+      }
+
       const title = document.getElementById('admin-p-title').value;
       const address = document.getElementById('admin-p-address').value;
       const locality = document.getElementById('admin-p-locality').value;
@@ -1027,11 +1125,41 @@ function attachAdminTabEvents(tab, root) {
         document.querySelectorAll('input[name="admin-amenity"]:checked')
       ).map(el => el.value);
 
-      const finalImages = uploadedImages.length > 0
-        ? uploadedImages
-        : ["https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80"];
+      const propertyId = `prop-custom-${Date.now()}`;
+      let finalImages = [];
+      if (uploadedImages.length > 0) {
+        for (let i = 0; i < uploadedImages.length; i++) {
+          const imgItem = uploadedImages[i];
+          const dataUrl = typeof imgItem === 'string' ? imgItem : imgItem.dataUrl;
+          const fileName = (typeof imgItem === 'object' && imgItem.fileName) ? imgItem.fileName : `admin-photo-${i + 1}.jpg`;
+          const mimeType = (typeof imgItem === 'object' && imgItem.mimeType) ? imgItem.mimeType : 'image/jpeg';
 
-      state.addProperty({
+          if (submitBtn) {
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Uploading photo ${i + 1} of ${uploadedImages.length}...`;
+          }
+
+          try {
+            const uploadRes = await api.uploadImage(dataUrl, propertyId, fileName, mimeType);
+            if (uploadRes && uploadRes.url) {
+              finalImages.push(uploadRes.url);
+            } else {
+              finalImages.push(dataUrl);
+            }
+          } catch (err) {
+            console.warn('Image upload fallback to dataUrl:', err);
+            finalImages.push(dataUrl);
+          }
+        }
+      } else {
+        finalImages = ["https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80"];
+      }
+
+      if (submitBtn) {
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Storing property...';
+      }
+
+      await state.addProperty({
+        id: propertyId,
         title,
         locality,
         address,
